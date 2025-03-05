@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Updated primary color to #333D79 */
+    --primary: 231 41% 34%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 196 50% 54%;
+    --secondary-foreground: 222 47% 11%;
+
+    --accent: 35 100% 48%;
+    --accent-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222 47% 11%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Updated primary color to #333D79 */
+    --primary: 231 41% 34%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 196 50% 54%;
+    --secondary-foreground: 222 47% 11%;
+
+    --accent: 35 100% 48%;
+    --accent-foreground: 222 47% 11%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom styles for file upload */
+.file-drop-area {
+  @apply relative border-2 border-dashed border-border rounded-lg p-8 transition-all duration-200 ease-in-out;
+}
+
+.file-drop-area.drag-active {
+  @apply border-primary bg-primary/5;
+}
+
+.file-input {
+  @apply absolute inset-0 w-full h-full opacity-0 cursor-pointer;
+}
+
+/* Slide card hover effect */
+.slide-card {
+  @apply transition-all duration-200 hover:shadow-md hover:-translate-y-1;
+}
+
+/* Progress bar animation */
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-progress {
+  animation: progress 1.5s ease-in-out;
+}
+
