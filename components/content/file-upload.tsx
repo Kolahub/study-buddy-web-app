@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { FileUp, X } from "lucide-react";
+import { LoadingSpinner, LoadingButton } from "@/components/ui/loading-spinner";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { api } from "@/lib/api";
 
 interface FileUploadProps {
   onUploadComplete: (fileUrl: string, metadata: any) => void;
@@ -25,6 +28,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [description, setDescription] = useState("");
   const [courseId, setCourseId] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -55,6 +59,9 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
   };
 
   const handleFileSelect = (file: File) => {
+    // Reset error state
+    setError(null);
+
     // Check if file is PDF or image
     const validTypes = [
       "application/pdf",
@@ -63,6 +70,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
       "image/gif",
     ];
     if (!validTypes.includes(file.type)) {
+      setError("Please upload a PDF or image file (JPEG, PNG, GIF).");
       toast({
         title: "Invalid file type",
         description: "Please upload a PDF or image file (JPEG, PNG, GIF).",
@@ -73,6 +81,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
 
     // Check file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
+      setError("Please upload a file smaller than 10MB.");
       toast({
         title: "File too large",
         description: "Please upload a file smaller than 10MB.",
@@ -98,7 +107,11 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
   };
 
   const handleUpload = async () => {
+    // Reset error state
+    setError(null);
+
     if (!selectedFile) {
+      setError("Please select a file to upload.");
       toast({
         title: "No file selected",
         description: "Please select a file to upload.",
@@ -108,6 +121,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
     }
 
     if (!title.trim()) {
+      setError("Please enter a title for your slide.");
       toast({
         title: "Title required",
         description: "Please enter a title for your slide.",
@@ -117,6 +131,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
     }
 
     if (!courseId.trim()) {
+      setError("Please enter a course ID for your slide.");
       toast({
         title: "Course ID required",
         description: "Please enter a course ID for your slide.",
@@ -129,20 +144,30 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
     setUploadProgress(0);
 
     try {
-      // Create a unique file name
-      const fileExt = selectedFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 15)}.${fileExt}`;
-      const filePath = `slides/${fileName}`;
+      // Create form data for API
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("courseId", courseId);
 
-      // Simulate progress updates
+      // Set up progress tracking
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           const newProgress = prev + 5;
           return newProgress < 90 ? newProgress : prev;
         });
       }, 100);
+
+      // For now, we'll use Supabase directly since the API endpoint isn't fully implemented
+      // In the future, replace with: const { data, error } = await api.uploadSlide(formData);
+
+      // Create a unique file name
+      const fileExt = selectedFile.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 15)}.${fileExt}`;
+      const filePath = `slides/${fileName}`;
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
@@ -192,7 +217,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
         fileName: selectedFile.name,
         fileType: selectedFile.type,
         fileSize: selectedFile.size,
-        file_path: filePath,
+        filePath: filePath,
       });
 
       // Reset form
@@ -204,6 +229,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
         fileInputRef.current.value = "";
       }
     } catch (error: any) {
+      setError(error.message || "An error occurred during upload.");
       toast({
         title: "Upload failed",
         description: error.message || "An error occurred during upload.",
@@ -216,6 +242,14 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <ErrorMessage
+          message={error}
+          variant="destructive"
+          onDismiss={() => setError(null)}
+        />
+      )}
+
       <div
         className={`file-drop-area ${isDragging ? "drag-active" : ""}`}
         onDragEnter={handleDragEnter}
